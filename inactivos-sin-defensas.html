@@ -1,0 +1,203 @@
+<html>
+<head>
+<script>
+function calcular(){
+	var reporteEspionaje = document.getElementById("inputTextArea").value;
+	var lineas = reporteEspionaje.split("\n");
+	var lineasLen = lineas.length;
+	var cantMetal = 0;
+	var cantCristal = 0;
+	var cantDeuterio = 0;
+	for(var i=0; i<lineasLen; i++){
+		if( startWith(lineas[i], "Metal:") ){
+			var posCristal = lineas[i  ].indexOf("Cristal:");
+			var posEnergia = lineas[i+1].indexOf("Energia:");
+			cantMetal    = str2Int( lineas[i  ].substring(6, posCristal ) );
+			cantCristal  = str2Int( lineas[i  ].substring(posCristal+8  ) );
+			cantDeuterio = str2Int( lineas[i+1].substring(10, posEnergia) );
+			break;
+		}
+	}
+	var total = cantMetal + cantCristal + cantDeuterio;
+	var t2 = Math.ceil(total / 2);
+	var min = Math.ceil(t2/5000) * 5000;
+	var roboMin = robar(cantMetal, cantCristal, cantDeuterio, min);
+	var roboMax = roboMin;
+	for(var i=1; i<50; i++){
+		var capacidad = min + i*5000;
+		var robo = robar(cantMetal, cantCristal, cantDeuterio, capacidad);
+		if(robo.total > roboMax.total){
+			roboMax = robo;
+		} else {
+			break;
+		}
+	}
+
+	var resultado =
+		"Robo M: " + roboMax.metal + "\n" +
+		"Robo C: " + roboMax.cristal + "\n" +
+		"Robo D: " + roboMax.deuterio + "\n" +
+		"Robo T: " + roboMax.total + "\n" +
+		"----------\n" +
+		"MIN: " + formatNaves(roboMin) + "\n" +
+		"MAX: " + formatNaves(roboMax);
+	document.getElementById("outputTextArea").value = resultado;
+
+	llenarTablas(cantMetal, cantCristal, cantDeuterio, roboMin, roboMax);
+}
+
+function startWith(value, prefix){
+	return value.lastIndexOf(prefix, 0) === 0;
+}
+
+function str2Int(value){
+	return parseInt(value.trim().replace(/\./g, ""));
+}
+
+function robar(metal, cristal, deuterio, capacidad){
+	var roboMetal    = Math.round(Math.min(metal   /2, capacidad/3));
+	var roboCristal  = Math.round(Math.min(cristal /2, (capacidad-roboMetal)/2));
+	var roboDeuterio = Math.round(Math.min(deuterio/2, capacidad-roboMetal-roboCristal));
+
+	var roboMetal2   = Math.round(Math.min(metal  /2 - roboMetal  , (capacidad-roboMetal-roboCristal-roboDeuterio)/2)); 
+	var roboCristal2 = Math.round(Math.min(cristal/2 - roboCristal, capacidad-roboMetal-roboMetal2-roboCristal-roboDeuterio));
+
+	roboMetal   += roboMetal2;
+	roboCristal += roboCristal2;
+
+	var roboTotal = roboMetal + roboCristal + roboDeuterio;
+
+	var robo = {metal: roboMetal, cristal: roboCristal, deuterio: roboDeuterio, total: roboTotal, capacidad: capacidad};
+	return robo;
+}
+
+function navesCarga(capacidad){
+	var soloGrandes  = Math.ceil(capacidad / 25000);
+	var soloChicas   = Math.ceil(capacidad /  5000);
+	var mixtaGrandes = Math.floor(capacidad / 25000);
+	var mixtaChicas  = Math.ceil((capacidad-mixtaGrandes*25000)/5000);
+	var retNavesCarga = {
+		soloGrandes: soloGrandes,
+		soloChicas: soloChicas,
+		mixtaGrandes: mixtaGrandes,
+		mixtaChicas: mixtaChicas
+	};
+	return retNavesCarga;
+}
+
+function formatNaves(robo){
+	var aux = navesCarga(robo.capacidad);
+	return robo.total + ",  " + robo.capacidad + " (" + aux.soloGrandes + " G)   (" + aux.soloChicas + " C)   (" + aux.mixtaGrandes + " G + " + aux.mixtaChicas + " C)";
+}
+
+function llenarTablas(metal, cristal, deuterio, roboMin, roboMax){
+	document.getElementById("tdMetal").innerText = metal;
+	document.getElementById("tdMetalDiv2").innerText = Math.round(metal/2);
+
+	document.getElementById("tdCristal").innerText = cristal;
+	document.getElementById("tdCristalDiv2").innerText = Math.round(cristal/2);
+
+	document.getElementById("tdDeuterio").innerText = deuterio;
+	document.getElementById("tdDeuterioDiv2").innerText = Math.round(deuterio/2);
+
+	var total = metal + cristal + deuterio;
+	document.getElementById("tdTotal").innerText = total;
+	document.getElementById("tdTotalDiv2").innerText = Math.round(total/2);
+
+	document.getElementById("tdMinRobo"     ).innerText = roboMin.total;
+	document.getElementById("tdMinCapacidad").innerText = roboMin.capacidad;
+	var minNavesCarga = navesCarga(roboMin.capacidad);
+	document.getElementById("tdMinSoloG"    ).innerText = minNavesCarga.soloGrandes;
+	document.getElementById("tdMinSoloC"    ).innerText = minNavesCarga.soloChicas;
+	document.getElementById("tdMinMixtasG"  ).innerText = minNavesCarga.mixtaGrandes;
+	document.getElementById("tdMinMixtasC"  ).innerText = minNavesCarga.mixtaChicas;
+
+	document.getElementById("tdMaxRobo"     ).innerText = roboMax.total;
+	document.getElementById("tdMaxCapacidad").innerText = roboMax.capacidad;
+	var maxNavesCarga = navesCarga(roboMax.capacidad);
+	document.getElementById("tdMaxSoloG"    ).innerText = maxNavesCarga.soloGrandes;
+	document.getElementById("tdMaxSoloC"    ).innerText = maxNavesCarga.soloChicas;
+	document.getElementById("tdMaxMixtasG"  ).innerText = maxNavesCarga.mixtaGrandes;
+	document.getElementById("tdMaxMixtasC"  ).innerText = maxNavesCarga.mixtaChicas;
+}
+
+</script>
+</head>
+<body>
+<textarea id="inputTextArea" rows=10 cols=100></textarea>
+<br>
+<br>
+<input type="button" value="Calcular" onClick="calcular()" />
+
+<br>
+<br>
+
+<table border=1>
+	<tr>
+		<td></td>
+		<td>En el planeta</td>
+		<td>Robo m&aacute;ximo</td>
+	</tr>
+	<tr>
+		<td>Metal</td>
+		<td align="right" id="tdMetal"></td>
+		<td align="right" id="tdMetalDiv2"></td>
+	</tr>
+	<tr>
+		<td>Cristal</td>
+		<td align="right" id="tdCristal"></td>
+		<td align="right" id="tdCristalDiv2"></td>
+	</tr>
+	<tr>
+		<td>Deuterio</td>
+		<td align="right" id="tdDeuterio"></td>
+		<td align="right" id="tdDeuterioDiv2"></td>
+	</tr>
+	<tr>
+		<td>Total</td>
+		<td align="right" id="tdTotal"></td>
+		<td align="right" id="tdTotalDiv2"></td>
+	</tr>
+</table>
+
+<br>
+<br>
+
+<table border=1>
+	<tr>
+		<td rowSpan=2></td>
+		<td rowSpan=2 align="center">Robo</td>
+		<td rowSpan=2 align="center">Capacidad</td>
+		<td rowSpan=2 align="center">S&oacute;lo Grandes</td>
+		<td rowSpan=2 align="center">S&oacute;lo Chicas</td>
+		<td colSpan=2 align="center">Mixtas</td>
+	</tr>
+	<tr>
+		<td align="center">Grandes</td>
+		<td align="center">Chicas</td>
+	</tr>
+	<tr>
+		<td>M&iacute;nimo</td>
+		<td align="right" id="tdMinRobo"></td>
+		<td align="right" id="tdMinCapacidad"></td>
+		<td align="right" id="tdMinSoloG"></td>
+		<td align="right" id="tdMinSoloC"></td>
+		<td align="right" id="tdMinMixtasG"></td>
+		<td align="right" id="tdMinMixtasC"></td>
+	</tr>
+	<tr>
+		<td>M&aacute;ximo</td>
+		<td align="right" id="tdMaxRobo"></td>
+		<td align="right" id="tdMaxCapacidad"></td>
+		<td align="right" id="tdMaxSoloG"></td>
+		<td align="right" id="tdMaxSoloC"></td>
+		<td align="right" id="tdMaxMixtasG"></td>
+		<td align="right" id="tdMaxMixtasC"></td>
+	</tr>
+</table>
+
+<br>
+<br>
+<textarea id="outputTextArea" rows=7 cols=100 readonly></textarea>
+
+</body>
