@@ -1,0 +1,11 @@
+* Inactivos sin defensas
+- Agregar el cálculo de oleadas.
+- Mejorar la interfaz para que se note más la cantidad de naves a enviar, y el resto de los datos ponerlos ocultos con un botón "mostrar más detalles".
+
+* Nuevas páginas
+- Una que indique la cantidad de naves de carga (grandes y chicas) que hay que crear para transportar toda la producción iaria de un planeta
+  Lo ideal sería:
+    - arrancar con los recursos necesarios para crear las naves
+    - ponerlas a fabricar
+    - al final del día o cuando se llegue a la producción desea, cargar las naves al tope, pero dejando los suficientes recursos para iniciar de nuevo el ciclo
+  Otra opción sería construir las naves, pero dejarlas en el planeta, cosa de poder sacar todos los recursos cuando haga falta (ojo con esto porque puede pararse la producción).
