@@ -6,47 +6,59 @@
 Pruebas
 <br>
 <br>
-<canvas id="myCanvas" width="578" height="200"></canvas>
+<canvas width="50" height="50" style= "border:1px solid black" onClick="test_drawPie(this)"></canvas>
 <br>
-<input type="button" value="Dibur un circulo" onClick="drawCircleMain()" />
+<canvas width="50" height="50" style= "border:1px solid black" onClick="test_drawPie(this)"></canvas>
 <script>
 
-function drawCircleMain(){
-	drawCircle(document.getElementById('myCanvas'));
+function Resources(metal, cristal, deuterio){
+	this.metal    = metal;
+	this.cristal  = cristal;
+	this.deuterio = deuterio;
 }
 
-function drawCircle(canvas){
+function test_drawPie(canvas){
+	drawResourcesAsPie(canvas, new Resources(getRandomInt(1000),getRandomInt(1000),getRandomInt(1000)));
+}
+
+function drawResourcesAsPie(canvas, resources){
+	drawPie(canvas, [resources.metal, resources.cristal, resources.deuterio]);
+}
+function drawPie(canvas, data){
+	var colors = ["grey", "blue", "green", "red"]
 	var context = canvas.getContext('2d');
 	var centerX = canvas.width / 2;
 	var centerY = canvas.height / 2;
-	var radius = 70;
+	var radius = Math.min(centerX, centerY);
 
 	var startAngle = 0;
 	var endAngle = 0;
 
-	context.beginPath();
+	var dataSum = 0;
+	for(var i=0; i<data.length; i++){
+		dataSum += data[i];
+	}
 
-	context.moveTo(centerX, centerY);
-	startAngle = 0;
-	endAngle = 1.5 * Math.PI;
-	context.arc(centerX, centerY, radius, startAngle, endAngle, false);
-	context.fillStyle = 'green';
-	context.fill();
-	context.closePath();
+	for(var i=0; i<data.length; i++){
+		var sliceAngle = (2.0 * Math.PI * data[i]) / dataSum;
+		endAngle += sliceAngle;
 
-	context.beginPath();
-	startAngle = endAngle;
-	endAngle = 2 * Math.PI;
-	context.moveTo(centerX, centerY);
-	context.arc(centerX, centerY, radius, startAngle, endAngle, false);
-	context.fillStyle = 'blue';
-	context.fill();
-	context.closePath();
+		context.beginPath();
+		context.moveTo(centerX, centerY);
+		context.arc(centerX, centerY, radius, startAngle, endAngle, false);
+		context.fillStyle = colors[i];
+		context.fill();
+		context.closePath();
 
-	// context.lineWidth = 5;
-	// context.strokeStyle = '#003300';
-	// context.stroke();
+		startAngle = endAngle;
+	}
 }
+
+function getRandomInt(max) {
+	var min = 0;
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 </script>
 
 </body>
